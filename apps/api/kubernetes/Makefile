@@ -24,7 +24,7 @@ reset.safe: env creds
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o "$(BASEDIR)/../containers/main" "$(BASEDIR)/../containers/main.go"
 	gcloud container builds submit "$(BASEDIR)/../containers/." --tag=$(DOCKERREPO)/api
 	-kubectl delete deployment api-deployment
-	-kubectl create deployment api-deployment --image=$(DOCKERREPO)/api --replicas=12 --port=8080 --labels=app=api 
+	-kubectl create deployment api-deployment --image=$(DOCKERREPO)/api --replicas=12 --port=8080
 	say "app refresh complete"		
 
 main:
@@ -46,22 +46,21 @@ deploy: env creds deployment service
 deploy.minikube: deployment service
 
 deploy.minikube.dockerhub:
-	kubectl create deployment api-deployment --image=$(DOCKERREPO):api --replicas=12 --port=8080 --labels=app=api
-	kubectl expose deployment api-deployment --name=api --target-port=8080  --type=NodePort --labels="app=api"
+	kubectl create deployment api-deployment --image=$(DOCKERREPO):api --replicas=12 --port=8080
+	kubectl expose deployment api-deployment --name=api --target-port=8080  --type=NodePort
 
 deploy.generic: 
-	kubectl create deployment api-deployment --image=$(DOCKERREPO)/whackapod-api --replicas=12 --port=8080 --labels=app=api 
-	kubectl expose deployment api-deployment --name=api --target-port=8080  --type=NodePort --labels="app=api"
+	kubectl create deployment api-deployment --image=$(DOCKERREPO)/whackapod-api --replicas=12 --port=8080
+	kubectl expose deployment api-deployment --name=api --target-port=8080  --type=NodePort
 
 test: 
 	cd 	"$(BASEDIR)/../containers" && go test
 
 deployment:
-	kubectl create deployment api-deployment --image=$(DOCKERREPO)/api --replicas=12 --port=8080 --labels=app=api 
+	kubectl create deployment api-deployment --image=$(DOCKERREPO)/api --replicas=12 --port=8080
 
 service:
-	kubectl expose deployment api-deployment --name=api --target-port=8080  --type=NodePort --labels="app=api"
-
+	kubectl expose deployment api-deployment --name=api --target-port=8080  --type=NodePort
 clean: env creds clean.deployment clean.service 
 clean.generic: clean.deployment clean.service 
 
